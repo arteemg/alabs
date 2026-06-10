@@ -158,6 +158,77 @@
     line-height: 1.65;
     font-weight: 400;
   }
+  /* ── STAY IN TOUCH ── */
+  .stay-box {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 32px;
+    padding: 20px 28px;
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 400px;
+  }
+  .stay-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.01em;
+  }
+  .stay-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+  .stay-input {
+    flex: 1;
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.18s;
+  }
+  .stay-input:focus { border-color: var(--border-hover); }
+  .stay-input::placeholder { color: var(--text-dim); }
+  .stay-btn {
+    padding: 9px 18px;
+    border-radius: 8px;
+    border: none;
+    background: var(--text);
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.18s;
+  }
+  .stay-btn:hover { opacity: 0.85; }
+  .stay-confirm {
+    font-size: 0.8rem;
+    color: var(--green);
+    font-weight: 600;
+    display: none;
+  }
+  .stay-error {
+    font-size: 0.8rem;
+    color: var(--red);
+    font-weight: 500;
+    display: none;
+  }
+  .stay-field-error {
+    font-size: 0.75rem;
+    color: var(--red);
+    margin-top: 4px;
+  }
 
   /* ── STATS ── */
   .stats-row {
@@ -246,6 +317,28 @@
     background: var(--bg-white);
     color: var(--text);
     box-shadow: var(--shadow);
+  }
+  .tab-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    color: var(--text-dim);
+  }
+  .tab-btn:disabled:hover { color: var(--text-dim); }
+  .tab-btn .soon-badge {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #b45309;
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    padding: 1px 7px;
+    border-radius: 999px;
+    vertical-align: middle;
+    letter-spacing: 0.02em;
+  }
+  .tab-bar.lg .tab-btn .soon-badge {
+    font-size: 0.72rem;
   }
 
   /* ── SCOREBOARD ── */
@@ -365,11 +458,15 @@
     color: var(--text-muted);
   }
   .legend-dot {
-    width: 8px; height: 8px;
+    width: 10px; height: 10px;
     border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.06);
   }
   .legend-dot.pass { background: var(--green); }
-  .legend-dot.fail { background: var(--red); }
+  .legend-dot.fail { background: #a8a29e; }
+  .legend-dot.partial {
+    background: linear-gradient(90deg, var(--green) 0 50%, #a8a29e 50% 100%);
+  }
 
   /* ── TASK LIST ── */
   .task-list {
@@ -434,9 +531,56 @@
     color: var(--green);
   }
   .model-badge.fail {
-    background: var(--red-bg);
-    border-color: var(--red-border);
-    color: var(--red);
+    background: #f5f5f4;
+    border-color: var(--border);
+    color: var(--text-muted);
+  }
+  /* Split badge for "mean" view: 1 attempt passed, 1 didn't (errors count as fail). */
+  .model-badge.partial-pf {
+    background: linear-gradient(90deg, #d1fae5 0 calc(50% - 1px), var(--border-hover) calc(50% - 1px) calc(50% + 1px), #e7e5e4 calc(50% + 1px) 100%);
+    border-color: var(--border-hover);
+    color: var(--text);
+  }
+
+  /* ── METRIC TOGGLE ── */
+  .metric-toggle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: fit-content;
+    margin: 0 auto 20px;
+  }
+  .metric-toggle button {
+    padding: 7px 16px;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .metric-toggle button:hover { color: var(--text-secondary); }
+  .metric-toggle button.active {
+    background: var(--bg-white);
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+  }
+  .metric-toggle-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding-right: 6px;
+    padding-left: 10px;
   }
 
   /* ── FOOTER ── */
@@ -482,47 +626,60 @@
     </a>
     <div class="nav-links">
       <a href="#benchmark">Benchmark</a>
-      <a href="#">Paper</a>
-      <a href="https://github.com" target="_blank" class="nav-pill">GitHub</a>
     </div>
   </div>
 </nav>
 
 <section class="hero">
   <div class="container">
-    <div class="hero-chip"><span class="chip-dot"></span> 120 tasks &middot; 4 domains &middot; 3 models</div>
+    <div class="hero-chip"><span class="chip-dot"></span> 30 tasks &middot; 1 domain live &middot; 2 models</div>
     <h1>Evaluating frontier models<br/>on <span class="em">biological reasoning</span></h1>
-    <p class="hero-sub">A comprehensive benchmark spanning proteins, small molecules, peptides, and antibodies.</p>
+    <p class="hero-sub">A benchmark spanning proteins, small molecules, peptides, and antibodies.</p>
+    <div class="stay-box">
+      <span class="stay-label">Stay in touch</span>
+      <div data-fs-success class="stay-confirm" style="display:none;">&#10003; You're on the list!</div>
+      <div data-fs-error class="stay-error" style="display:none;"></div>
+      <form id="stay-form">
+        <div class="stay-row">
+          <input class="stay-input" type="email" id="stayEmail" name="email"
+                 placeholder="your@email.com" autocomplete="email"
+                 data-fs-field required />
+          <button class="stay-btn" type="submit" data-fs-submit-btn>Notify me</button>
+        </div>
+        <span data-fs-error="email" class="stay-field-error"></span>
+      </form>
+    </div>
   </div>
 </section>
 
 <div class="stats-row">
-  <div class="stat-card"><div class="stat-val">120</div><div class="stat-lbl">Tasks</div></div>
-  <div class="stat-card"><div class="stat-val">4</div><div class="stat-lbl">Domains</div></div>
-  <div class="stat-card"><div class="stat-val">3</div><div class="stat-lbl">Models</div></div>
-  <div class="stat-card"><div class="stat-val" id="avgRate">—</div><div class="stat-lbl">Avg Pass Rate</div></div>
+  <div class="stat-card"><div class="stat-val">30</div><div class="stat-lbl">Tasks</div></div>
+  <div class="stat-card"><div class="stat-val">1<span style="font-size:1rem;color:var(--text-dim);font-weight:600;">/4</span></div><div class="stat-lbl">Domains Live</div></div>
+  <div class="stat-card"><div class="stat-val">2</div><div class="stat-lbl">Models</div></div>
 </div>
 
 <section class="bench-section" id="benchmark">
   <div class="container">
     <div class="bench-header">
       <h2>Benchmark Results</h2>
-      <p>Select a domain to explore individual task results</p>
+      <p>Small-molecule binding-site rule induction · 30 tasks · 2 attempts per task</p>
     </div>
 
     <div class="tab-bar lg" id="tabBar">
-      <button class="tab-btn active" data-tab="proteins">Proteins</button>
-      <button class="tab-btn" data-tab="small-molecules">Small Molecules</button>
-      <button class="tab-btn" data-tab="peptides">Peptides</button>
-      <button class="tab-btn" data-tab="antibodies">Antibodies</button>
+      <button class="tab-btn active" data-tab="small-molecules">Small Molecules</button>
+      <button class="tab-btn" data-tab="peptides" disabled>Peptides <span class="soon-badge">(!) Soon</span></button>
+      <button class="tab-btn" data-tab="antibodies" disabled>Antibodies <span class="soon-badge">(!) Soon</span></button>
+    </div>
+
+    <div class="metric-toggle" id="metricToggle" role="tablist" aria-label="Metric">
+      <span class="metric-toggle-label">Metric</span>
+      <button data-metric="mean" class="active" type="button">Mean</button>
+      <button data-metric="passAtK" type="button">Pass@2</button>
     </div>
 
     <div class="domain-scores" id="domainScores"></div>
 
-    <div class="legend">
-      <div class="legend-item"><span class="legend-dot pass"></span> Pass</div>
-      <div class="legend-item"><span class="legend-dot fail"></span> Fail</div>
-    </div>
+    <div class="legend" id="legend"></div>
 
     <div class="task-list" id="taskList"></div>
   </div>
@@ -530,178 +687,133 @@
 
 <footer>
   <div class="container">
-    &copy; 2026 A-Labs x Bio &mdash; An open benchmark for biological reasoning.&nbsp; <a href="#">Read the paper</a>
+    &copy; 2026 A-Labs x Bio &mdash; An open benchmark for biological reasoning.
   </div>
 </footer>
 
 <script>
-// Claude ~57%, OpenAI ~47%, DeepSeek ~23% per domain (none exceed 60%)
+// Real results computed from harbor jobs:
+//   jobs/gpt_5_codex_pass@2_2026-06-08__11-36-08/result.json  (pass@2 = 0.50)
+//   jobs/claude_opus_4_6_pass@2_2026-06-08__12-34-54/result.json (pass@2 = 0.83)
+// Per-task pass@2 = pass if at least one of 2 attempts produced reward 1.0.
+// Empty placeholder arrays for the other domains until they are released.
 const TASKS = {
-  proteins: [
-    { name: "Protein Binding Site Prediction", desc: "Identify functional binding pockets from sequence", models: { claude: "pass", openai: "pass", deepseek: "fail" } },
-    { name: "Protein Fold Classification", desc: "Assign SCOP/CATH fold classes to novel domains", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Mutation Effect Prediction", desc: "Predict stability change from single-point mutations", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Protein–Protein Interaction", desc: "Determine whether two proteins physically interact", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Signal Peptide Detection", desc: "Locate N-terminal signal peptides in secreted proteins", models: { claude: "pass", openai: "pass", deepseek: "fail" } },
-    { name: "Subcellular Localization", desc: "Predict compartment localization from sequence features", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "Secondary Structure Assignment", desc: "Assign helix, sheet, and coil to each residue", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Domain Boundary Detection", desc: "Identify start and end positions of protein domains", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Enzyme Commission Classification", desc: "Map enzymes to EC numbers based on reaction type", models: { claude: "pass", openai: "pass", deepseek: "fail" } },
-    { name: "Thermostability Prediction", desc: "Estimate melting temperature from sequence composition", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Disorder Region Prediction", desc: "Identify intrinsically disordered regions", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Post-Translational Modification Sites", desc: "Predict phosphorylation, glycosylation, and ubiquitination sites", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Transmembrane Topology", desc: "Assign membrane-spanning helices and orientation", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Contact Map Prediction", desc: "Predict residue–residue contacts from MSA", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Protein Solubility Estimation", desc: "Classify overexpression solubility in E. coli", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Homology Detection", desc: "Detect remote homologs below 20% sequence identity", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Active Site Residue Identification", desc: "Pinpoint catalytic residues in enzyme sequences", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "Protein Function Annotation", desc: "Assign Gene Ontology terms from sequence", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Allosteric Site Detection", desc: "Identify non-active-site regulatory pockets", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Protein Aggregation Propensity", desc: "Predict amyloidogenic and aggregation-prone regions", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Coiled-Coil Prediction", desc: "Detect coiled-coil motifs and heptad repeats", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "Disulfide Bond Prediction", desc: "Pair cysteine residues forming disulfide bridges", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Protein–DNA Binding Residues", desc: "Identify residues at protein–DNA interfaces", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Metal-Binding Site Prediction", desc: "Locate zinc, iron, and copper coordination sites", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Protein Half-Life Estimation", desc: "Predict intracellular degradation rates", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Quaternary Structure Prediction", desc: "Determine oligomeric state and stoichiometry", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "Conformational Change Detection", desc: "Identify flexible regions undergoing structural change", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Protein Expression Level", desc: "Predict relative expression from codon usage", models: { claude: "pass", openai: "fail", deepseek: "pass" } },
-    { name: "Evolutionary Rate Estimation", desc: "Infer site-specific substitution rates", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Protein–Ligand Affinity Ranking", desc: "Rank ligand binding affinities for a target", models: { claude: "pass", openai: "pass", deepseek: "fail" } },
-  ],
   "small-molecules": [
-    { name: "Molecular Property Prediction", desc: "Predict logP, pKa, and solubility from SMILES", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Drug-Likeness Assessment", desc: "Evaluate Lipinski and Veber rule compliance", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "ADMET Property Prediction", desc: "Forecast absorption, distribution, metabolism, excretion, toxicity", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Retrosynthetic Analysis", desc: "Propose synthetic routes for target molecules", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "Reaction Product Prediction", desc: "Predict major product of organic reactions", models: { claude: "pass", openai: "pass", deepseek: "fail" } },
-    { name: "Toxicity Classification", desc: "Classify acute oral toxicity EPA categories", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Molecular Fingerprint Similarity", desc: "Compute Tanimoto similarity between compound pairs", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Scaffold Hopping", desc: "Identify bioisosteric replacements for core scaffolds", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "CYP450 Inhibition Prediction", desc: "Predict inhibition of major CYP isoforms", models: { claude: "pass", openai: "pass", deepseek: "fail" } },
-    { name: "Blood-Brain Barrier Penetration", desc: "Classify CNS permeability from molecular features", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "hERG Channel Blockade", desc: "Predict cardiotoxicity risk from hERG inhibition", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "Aqueous Solubility Prediction", desc: "Estimate thermodynamic solubility in water", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Metabolic Stability", desc: "Predict hepatic microsomal clearance rates", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "SMILES Canonicalization", desc: "Convert arbitrary SMILES to canonical form", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Functional Group Identification", desc: "Detect and enumerate functional groups in molecules", models: { claude: "pass", openai: "fail", deepseek: "pass" } },
-    { name: "Stereocenter Assignment", desc: "Identify R/S configuration of chiral centers", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Tautomer Enumeration", desc: "Generate relevant tautomeric forms of a molecule", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Polymer Repeat Unit Prediction", desc: "Predict properties from monomer SMILES", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Drug–Drug Interaction", desc: "Predict pharmacokinetic interactions between drugs", models: { claude: "pass", openai: "pass", deepseek: "fail" } },
-    { name: "Bioavailability Estimation", desc: "Predict oral bioavailability class", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "Molecular Weight Calculation", desc: "Compute exact and average molecular weights", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Photostability Assessment", desc: "Predict UV/vis degradation susceptibility", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Prodrug Activation Prediction", desc: "Identify enzymatic cleavage sites in prodrugs", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Selectivity Profiling", desc: "Predict off-target kinase selectivity", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "Molecular Complexity Score", desc: "Quantify synthetic accessibility and complexity", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Fragment-Based Linking", desc: "Propose linkers between fragment hits", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Chemical Named Entity Recognition", desc: "Extract compound names from biomedical text", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Reaction Condition Prediction", desc: "Suggest optimal solvent, catalyst, temperature", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Isomer Enumeration", desc: "Generate constitutional and stereoisomers", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Molecular Generation from Constraints", desc: "Generate valid SMILES satisfying property constraints", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
+    // Per-model attempt counts: { p: passes, f: fails, e: errors }; total = 2 attempts.
+    // Slugs derived from the rule-facet each task's held-out PDBs exercise.
+    { name: "binding-sites-eh-01-clean-cofactors", desc: "Agentic reasoning on clean nucleotide cofactors (PDBs: 1JG1, 7D8F, 1A0I)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-eh-02-artifact-filter", desc: "Agentic reasoning on cofactors under heavy buffer-additive artifact filtering (PDBs: 4FK7, 6X94, 5HGZ)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
+    { name: "binding-sites-eh-03-heme-flavin-nadp", desc: "Agentic reasoning on heme + flavin + NADP multi-cofactor scenes (PDBs: 7SUX, 2HI4, 8H0M)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-eh-04-fad-substrate", desc: "Agentic reasoning on FAD paired with a unique substrate (PDBs: 6R0P, 3BRN, 2YG7)", models: { codex: { p: 2, f: 0, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
+    { name: "binding-sites-eh-05-metal-nucleotide", desc: "Agentic reasoning on Mg/Mn-coordinated nucleotide cofactors (PDBs: 5MF5, 2P73, 1YZQ)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-eh-06-atp-mg-surface", desc: "Agentic reasoning on Mg-coordinated ATP analog with surface-ion filtering (PDBs: 6DYS, 4LRJ, 4UAU)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-eh-07-glycans", desc: "Agentic reasoning on glycans (BGC, FUC) and sugar substrates (PDBs: 4WZZ, 5Z3F, 6KPM)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
+    { name: "binding-sites-eh-08-flavin-coa", desc: "Agentic reasoning on multi-flavin (FAD/FMN) + acetyl-CoA active sites (PDBs: 2CY2, 4BF9, 5I39)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
+    { name: "binding-sites-eh-09-multi-cofactor", desc: "Agentic reasoning on Mg/Mn-coord active sites with multiple cofactors (PDBs: 5A61, 5E4R, 4CVM)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-eh-10-heme-metal-filter", desc: "Agentic reasoning on heme + Mg-coord ATP with surface-Mg filtering (PDBs: 3DNT, 3R9C, 4L6G)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
+    { name: "binding-sites-eh-11-fe-2og", desc: "Agentic reasoning on Fe-coordinated α-KG dioxygenase active sites (PDBs: 2C78, 6K0F, 1R2Q)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-eh-12-heme-fe-s-artifact", desc: "Agentic reasoning on heme retention while dropping SF4 iron-sulfur as artifact (PDBs: 2DE3, 4Z5P, 3ZGN)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 0, f: 2, e: 0 } } },
+    { name: "binding-sites-eh-13-ap5-metal", desc: "Agentic reasoning on ADP/AP5 + Mg coordination with surface-Mg filtering (PDBs: 3BE4, 3NHA, 1G9X)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
+    { name: "binding-sites-eh-14-glycan-cofactor", desc: "Agentic reasoning on glycan (BGC) alongside ATP-analog + Trp scenes (PDBs: 7VT6, 6DA0, 2DEI)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-eh-15-di-nucleotides", desc: "Agentic reasoning on di-nucleotide (ADP/GDP) + vitamin substrate (PDBs: 5DMH, 5C1S, 4NMY)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
+    { name: "binding-sites-mh-01-substrates", desc: "Agentic reasoning on bare substrate ligands (no canonical cofactor)", models: { codex: { p: 2, f: 0, e: 0 }, claude: { p: 0, f: 2, e: 0 } } },
+    { name: "binding-sites-mh-02-heme-sam", desc: "Agentic reasoning on heme + SAM cofactor scenes", models: { codex: { p: 2, f: 0, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
+    { name: "binding-sites-mh-03-gdp-utp-arg", desc: "Agentic reasoning on GDP/UTP cofactors plus a free amino-acid ligand", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
+    { name: "binding-sites-mh-04-nucleosides", desc: "Agentic reasoning on nucleoside-class ligands (ADN/APR)", models: { codex: { p: 2, f: 0, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
+    { name: "binding-sites-mh-05-heme-artifacts", desc: "Agentic reasoning on heme cofactor under heavy buffer-additive load", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
+    { name: "binding-sites-mh-06-glycan-heme", desc: "Agentic reasoning on glycans + heme + ADP multi-facet scenes", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 0, f: 2, e: 0 } } },
+    { name: "binding-sites-mh-07-fad-sam", desc: "Agentic reasoning on FAD + SAM cofactor combinations", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
+    { name: "binding-sites-mh-08-udp-glycan", desc: "Agentic reasoning on UDP-sugar (NAG/BGC) glycan scenes", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-mh-09-fe-mg-nucleotide", desc: "Agentic reasoning on Fe- and Mg-coordinated nucleotides", models: { codex: { p: 2, f: 0, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
+    { name: "binding-sites-mh-10-gtp-metal-filter", desc: "Agentic reasoning on ADP/GTP + Mg coord with surface-ion filtering", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
+    { name: "binding-sites-mh-11-fad-adp", desc: "Agentic reasoning on FAD + ADP cofactor combinations", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 0, f: 2, e: 0 } } },
+    { name: "binding-sites-mh-12-anp-mg", desc: "Agentic reasoning on ATP-analog (ANP) + Mg coordination", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 0, f: 1, e: 1 } } },
+    { name: "binding-sites-mh-13-heme-flavin", desc: "Agentic reasoning on heme + FAD + complex substrate scenes", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
+    { name: "binding-sites-mh-14-nadp-metal", desc: "Agentic reasoning on NADP + Mg coordination under artifact load", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-mh-15-nad-sam", desc: "Agentic reasoning on NAD/NADP + SAM cofactor mixtures", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
   ],
-  peptides: [
-    { name: "Antimicrobial Peptide Classification", desc: "Classify peptides with antimicrobial activity", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Cell-Penetrating Peptide Detection", desc: "Identify peptides that cross cell membranes", models: { claude: "pass", openai: "pass", deepseek: "fail" } },
-    { name: "Peptide Secondary Structure", desc: "Predict helical, sheet, and turn propensity", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Hemolytic Activity Prediction", desc: "Classify peptides by red blood cell lysis potential", models: { claude: "pass", openai: "pass", deepseek: "fail" } },
-    { name: "Peptide–MHC Binding Affinity", desc: "Predict binding to MHC class I/II molecules", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "Neoantigen Identification", desc: "Identify tumor-specific peptide antigens", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Cyclic Peptide Permeability", desc: "Predict membrane permeability of cyclic peptides", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Peptide Stability in Serum", desc: "Estimate half-life in human serum", models: { claude: "pass", openai: "pass", deepseek: "fail" } },
-    { name: "Peptide Toxicity Prediction", desc: "Classify potential toxic effects", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Peptide Solubility Prediction", desc: "Estimate aqueous solubility from sequence", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Peptide–Protein Docking", desc: "Predict binding pose and interface residues", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Self-Assembling Peptide Design", desc: "Identify sequences forming hydrogels or fibrils", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Peptide Immunogenicity", desc: "Predict immune response elicitation", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "D-Amino Acid Substitution Effect", desc: "Predict impact of D-amino acid replacements", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Peptide Aggregation Prediction", desc: "Identify aggregation-prone sequences", models: { claude: "pass", openai: "pass", deepseek: "fail" } },
-    { name: "Stapled Peptide Design", desc: "Suggest optimal staple positions for alpha-helices", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Peptide Blood-Brain Barrier Transport", desc: "Predict CNS-penetrating peptides", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Bitter Taste Prediction", desc: "Classify peptides by bitterness perception", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "ACE Inhibitory Peptide", desc: "Predict angiotensin-converting enzyme inhibition", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Peptide–Lipid Interaction", desc: "Model peptide insertion into lipid bilayers", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Protease Cleavage Site Prediction", desc: "Identify susceptible cleavage sites", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Peptide Charge Distribution", desc: "Calculate net charge at physiological pH", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Antifungal Peptide Classification", desc: "Classify peptides with antifungal activity", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "Peptide–Receptor Selectivity", desc: "Predict receptor subtype selectivity", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "PEGylation Site Prediction", desc: "Suggest optimal PEGylation positions", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Peptide Conformation Sampling", desc: "Generate low-energy backbone conformations", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Tumor-Homing Peptide Design", desc: "Identify peptides targeting tumor vasculature", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Peptide Library Design", desc: "Optimize diversity in combinatorial libraries", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "Peptide N-/C-Cap Effects", desc: "Predict stability effects of terminal modifications", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Opioid Peptide Activity", desc: "Classify mu/delta/kappa receptor activity", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-  ],
-  antibodies: [
-    { name: "CDR Loop Structure Prediction", desc: "Model H3 loop conformations from sequence", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Antibody Humanization", desc: "Suggest framework mutations for humanization", models: { claude: "pass", openai: "pass", deepseek: "fail" } },
-    { name: "Antigen Epitope Mapping", desc: "Predict linear and conformational epitopes", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "VH/VL Pairing Prediction", desc: "Identify cognate heavy-light chain pairs", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Antibody Developability Assessment", desc: "Score aggregation, viscosity, and clearance risk", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Isotype Classification", desc: "Assign IgG, IgA, IgM, IgE, IgD from sequence", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Affinity Maturation Suggestion", desc: "Propose mutations to improve binding affinity", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "Fc Effector Function Prediction", desc: "Predict ADCC, ADCP, CDC from Fc sequence", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Immunogenicity Risk Assessment", desc: "Predict anti-drug antibody response likelihood", models: { claude: "pass", openai: "pass", deepseek: "fail" } },
-    { name: "Antibody Thermostability", desc: "Predict Tm and aggregation onset temperature", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Paratope Prediction", desc: "Identify antibody residues contacting antigen", models: { claude: "pass", openai: "pass", deepseek: "fail" } },
-    { name: "Germline Gene Assignment", desc: "Map V, D, J gene segments from rearranged sequence", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Somatic Hypermutation Analysis", desc: "Quantify and locate SHM positions", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "Bispecific Antibody Design", desc: "Suggest architectures for dual-targeting formats", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Antibody–Antigen Docking", desc: "Predict binding orientation and interface", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Cross-Reactivity Prediction", desc: "Assess binding to orthologous antigens", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Nanobody Stability Prediction", desc: "Predict VHH thermal and chemical stability", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Framework Region Conservation", desc: "Assess deviations from germline frameworks", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Antibody Viscosity Prediction", desc: "Estimate high-concentration solution viscosity", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Polyreactivity Screening", desc: "Predict non-specific binding to multiple antigens", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Antibody Expression Yield", desc: "Predict transient expression levels in CHO/HEK", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Light Chain Mispairing", desc: "Assess risk of incorrect LC pairing in bispecifics", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "CDR Canonical Structure Class", desc: "Assign canonical forms to CDR L1–L3 and H1–H2", models: { claude: "pass", openai: "fail", deepseek: "pass" } },
-    { name: "Clonal Lineage Reconstruction", desc: "Cluster and trace B-cell lineage trees", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-    { name: "Antibody Charge Variant Prediction", desc: "Predict acidic/basic variant profiles", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Half-Life Extension Strategy", desc: "Suggest Fc mutations for FcRn binding improvement", models: { claude: "pass", openai: "pass", deepseek: "fail" } },
-    { name: "Antibody Sequence Liability Detection", desc: "Flag deamidation, oxidation, glycosylation motifs", models: { claude: "pass", openai: "pass", deepseek: "pass" } },
-    { name: "Complement Activation Prediction", desc: "Predict C1q binding and CDC potential", models: { claude: "fail", openai: "fail", deepseek: "fail" } },
-    { name: "Antibody Format Selection", desc: "Recommend IgG/scFv/Fab/nanobody format for use case", models: { claude: "pass", openai: "fail", deepseek: "fail" } },
-    { name: "Repertoire Diversity Analysis", desc: "Quantify clonal diversity and convergence metrics", models: { claude: "fail", openai: "pass", deepseek: "fail" } },
-  ],
+  proteins: [],
+  peptides: [],
+  antibodies: [],
 };
 
-const MODEL_NAMES = { claude: "Claude Opus 4.7", openai: "OpenAI o3", deepseek: "DeepSeek R1" };
+const MODEL_NAMES = { claude: "Claude Opus 4.6", codex: "GPT-5 Codex" };
+
+// Active metric: "mean" (per-attempt success rate, errors count as 0)
+// or "passAtK" (per-task: at least one passing attempt out of 2).
+let METRIC = "mean";
+
+function scoreClass(pct) {
+  if (pct >= 70) return "high";
+  if (pct >= 40) return "mid";
+  return "low";
+}
+
+// Per-model, per-task -> { cls, label } describing the badge visual.
+// Errors are treated as failed attempts.
+function badgeFor(rec) {
+  const p = rec.p;
+  const f = rec.f + rec.e;
+  if (METRIC === "passAtK") {
+    return p >= 1
+      ? { cls: "pass", label: "\u2713" }
+      : { cls: "fail", label: "\u2717" };
+  }
+  if (p === 2) return { cls: "pass", label: "2/2 \u2713" };
+  if (f === 2) return { cls: "fail", label: "0/2 \u2717" };
+  return { cls: "partial-pf", label: "1/2" };
+}
 
 function computeScores(tasks) {
   const scores = {};
   for (const m of Object.keys(MODEL_NAMES)) {
-    let passed = 0;
-    for (const t of tasks) { if (t.models[m] === "pass") passed++; }
-    scores[m] = Math.round((passed / tasks.length) * 100);
+    if (METRIC === "passAtK") {
+      let passed = 0;
+      for (const t of tasks) { if ((t.models[m]?.p || 0) >= 1) passed++; }
+      scores[m] = tasks.length ? Math.round((passed / tasks.length) * 100) : 0;
+    } else {
+      // Mean per-attempt: errors counted as 0 (matches result.json metrics.mean).
+      let passed = 0, total = 0;
+      for (const t of tasks) {
+        const r = t.models[m] || { p: 0, f: 0, e: 0 };
+        passed += r.p;
+        total += r.p + r.f + r.e;
+      }
+      scores[m] = total ? Math.round((passed / total) * 100) : 0;
+    }
   }
   return scores;
 }
 
-function scoreClass(pct) {
-  if (pct >= 50) return "mid";
-  if (pct >= 30) return "low";
-  return "low";
-}
-
-function computeAvgRate() {
-  let total = 0, count = 0;
-  for (const tasks of Object.values(TASKS)) {
-    for (const t of tasks) {
-      for (const m of Object.keys(MODEL_NAMES)) {
-        if (t.models[m] === "pass") total++;
-        count++;
-      }
-    }
-  }
-  return Math.round((total / count) * 100) + "%";
+function renderLegend() {
+  const legend = document.getElementById("legend");
+  const items = METRIC === "passAtK"
+    ? [
+        { cls: "pass", text: "Solved in \u22651 of 2 attempts" },
+        { cls: "fail", text: "Failed both attempts" },
+      ]
+    : [
+        { cls: "pass", text: "2/2 attempts passed" },
+        { cls: "partial", text: "1/2 attempts passed" },
+        { cls: "fail", text: "0/2 attempts passed" },
+      ];
+  legend.innerHTML = items.map(i =>
+    `<div class="legend-item"><span class="legend-dot ${i.cls}"></span> ${i.text}</div>`
+  ).join("");
 }
 
 function renderTab(tabId) {
-  const tasks = TASKS[tabId];
+  const tasks = TASKS[tabId] || [];
   const domainScores = document.getElementById("domainScores");
   const taskList = document.getElementById("taskList");
+
+  renderLegend();
+
+  if (!tasks.length) {
+    domainScores.innerHTML = "";
+    taskList.innerHTML = `<div class="task-row" style="justify-content:center;text-align:center;color:var(--text-muted);"><div style="padding:24px;">This domain is not yet released. Coming soon.</div></div>`;
+    return;
+  }
 
   const scores = computeScores(tasks);
   domainScores.innerHTML = Object.entries(scores).map(([m, pct]) =>
@@ -713,11 +825,11 @@ function renderTab(tabId) {
   ).join("");
 
   taskList.innerHTML = tasks.map((t, i) => {
-    const badges = Object.entries(t.models).map(([m, status]) =>
-      `<div class="model-badge ${status}">
-        ${status === "pass" ? "✓" : "✗"} ${MODEL_NAMES[m]}
-      </div>`
-    ).join("");
+    const badges = Object.keys(MODEL_NAMES).map((m) => {
+      const rec = t.models[m] || { p: 0, f: 0, e: 0 };
+      const b = badgeFor(rec);
+      return `<div class="model-badge ${b.cls}">${b.label} ${MODEL_NAMES[m]}</div>`;
+    }).join("");
     return `<div class="task-row">
       <div class="task-num">${String(i + 1).padStart(2, "0")}</div>
       <div class="task-info">
@@ -729,16 +841,38 @@ function renderTab(tabId) {
   }).join("");
 }
 
+function activeTabId() {
+  const active = document.querySelector(".tab-btn.active");
+  return active ? active.dataset.tab : "small-molecules";
+}
+
+function refreshAll() {
+  renderTab(activeTabId());
+}
+
 document.getElementById("tabBar").addEventListener("click", (e) => {
   const btn = e.target.closest(".tab-btn");
-  if (!btn) return;
+  if (!btn || btn.disabled) return;
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
   renderTab(btn.dataset.tab);
 });
 
-document.getElementById("avgRate").textContent = computeAvgRate();
-renderTab("proteins");
+document.getElementById("metricToggle").addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-metric]");
+  if (!btn) return;
+  if (btn.classList.contains("active")) return;
+  document.querySelectorAll("#metricToggle button").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  METRIC = btn.dataset.metric;
+  refreshAll();
+});
+
+refreshAll();
+
+window.formspree = window.formspree || function () { (formspree.q = formspree.q || []).push(arguments); };
+formspree('initForm', { formElement: '#stay-form', formId: 'mojznqde' });
 </script>
+<script src="https://unpkg.com/@formspree/ajax@1" defer></script>
 </body>
 </html>
