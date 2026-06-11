@@ -250,7 +250,7 @@
     display: flex;
     justify-content: center;
     gap: 12px;
-    padding: 40px 0 56px;
+    padding: 16px 0 40px;
     flex-wrap: wrap;
   }
   .stat-card {
@@ -304,6 +304,30 @@
     line-height: 1.55;
     text-align: center;
   }
+  .tab-caption .more {
+    display: none;
+  }
+  .tab-caption.expanded .more {
+    display: inline;
+  }
+  .tab-caption .ellipsis {
+    display: inline;
+  }
+  .tab-caption.expanded .ellipsis {
+    display: none;
+  }
+  .caption-toggle {
+    display: inline-block;
+    margin-left: 6px;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--accent);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .caption-toggle:hover { opacity: 0.85; }
 
   /* ── TABS ── */
   .tab-bar {
@@ -460,6 +484,77 @@
     font-variant-numeric: tabular-nums;
     min-width: 36px;
     text-align: right;
+  }
+  .run-agent-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--bg-white);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.18s, transform 0.18s;
+    align-self: center;
+  }
+  .run-agent-btn:hover { border-color: var(--border-hover); transform: translateY(-1px); }
+  .run-agent-btn .arrow { font-size: 1rem; line-height: 1; }
+
+  /* ── RUN-AGENT MODAL ── */
+  .run-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s;
+  }
+  .run-modal-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .run-modal-card {
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    padding: 28px 28px 24px;
+    max-width: 440px;
+    width: 100%;
+    position: relative;
+    transform: translateY(8px);
+    transition: transform 0.18s;
+  }
+  .run-modal-backdrop.open .run-modal-card { transform: translateY(0); }
+  .run-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 4px 8px;
+  }
+  .run-modal-close:hover { color: var(--text); }
+  .run-modal-sub {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    margin: 8px 0 16px;
+    line-height: 1.5;
   }
   .ds-pct.high { color: var(--green); }
   .ds-pct.mid { color: #d97706; }
@@ -695,7 +790,7 @@
       <button class="tab-btn" data-tab="antibodies" disabled>Antibodies <span class="soon-badge">(!) Soon</span></button>
     </div>
 
-    <p class="tab-caption">Given example binding sites, agents had to infer the rules and apply them to held-out cases: distance cutoffs, ligands vs additives, cofactors vs surface ions, sugars, modified amino acids, and more.</p>
+    <p class="tab-caption" id="benchCaption">Given proteins with their small-molecule binding residues labelled, agents need to infer the rules and apply them to held-out chains: which distance threshold defines a contact for a small molecule, which co-crystallised molecules are real ligands vs<span class="ellipsis"> &hellip;</span><span class="more"> crystallisation buffer, when a metal is a cofactor vs a surface ion, how to handle sugars and modified amino acids, and whether every duplicate ligand copy contributes. Structures come from real PDB depositions. Difficulty tiers vary the number of labelled examples: 3&ndash;5 for extra-hard and 12&ndash;13 for medium-hard. The tasks are self-contained: every criterion is demonstrated by at least one positive example the agent sees.</span><button class="caption-toggle" id="benchCaptionToggle" type="button" aria-expanded="false">Show more</button></p>
 
     <div class="domain-scores" id="domainScores"></div>
 
@@ -704,6 +799,25 @@
     <div class="task-list" id="taskList"></div>
   </div>
 </section>
+
+<div class="run-modal-backdrop" id="runModal" role="dialog" aria-modal="true" aria-labelledby="runModalTitle" aria-hidden="true">
+  <div class="run-modal-card">
+    <button class="run-modal-close" type="button" id="runModalClose" aria-label="Close">&times;</button>
+    <span class="stay-label" id="runModalTitle">Stay in touch</span>
+    <p class="run-modal-sub">Drop your email and we'll send you everything you need to run this benchmark with your own agent.</p>
+    <div data-fs-success class="stay-confirm" style="display:none;">&#10003; You're on the list!</div>
+    <div data-fs-error class="stay-error" style="display:none;"></div>
+    <form id="run-form">
+      <div class="stay-row">
+        <input class="stay-input" type="email" id="runEmail" name="email"
+               placeholder="your@email.com" autocomplete="email"
+               data-fs-field required />
+        <button class="stay-btn" type="submit" data-fs-submit-btn>Notify me</button>
+      </div>
+      <span data-fs-error="email" class="stay-field-error"></span>
+    </form>
+  </div>
+</div>
 
 <footer>
   <div class="container">
@@ -721,36 +835,36 @@ const TASKS = {
   "small-molecules": [
     // Per-model attempt counts: { p: passes, f: fails, e: errors }; total = 2 attempts.
     // Slugs derived from the rule-facet each task's held-out PDBs exercise.
-    { name: "binding-sites-eh-01-clean-cofactors", desc: "Agentic reasoning on clean nucleotide cofactors (PDBs: 1JG1, 7D8F, 1A0I)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
-    { name: "binding-sites-eh-02-artifact-filter", desc: "Agentic reasoning on cofactors under heavy buffer-additive artifact filtering (PDBs: 4FK7, 6X94, 5HGZ)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
-    { name: "binding-sites-eh-03-heme-flavin-nadp", desc: "Agentic reasoning on heme + flavin + NADP multi-cofactor scenes (PDBs: 7SUX, 2HI4, 8H0M)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
-    { name: "binding-sites-eh-04-fad-substrate", desc: "Agentic reasoning on FAD paired with a unique substrate (PDBs: 6R0P, 3BRN, 2YG7)", models: { codex: { p: 2, f: 0, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
-    { name: "binding-sites-eh-05-metal-nucleotide", desc: "Agentic reasoning on Mg/Mn-coordinated nucleotide cofactors (PDBs: 5MF5, 2P73, 1YZQ)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
-    { name: "binding-sites-eh-06-atp-mg-surface", desc: "Agentic reasoning on Mg-coordinated ATP analog with surface-ion filtering (PDBs: 6DYS, 4LRJ, 4UAU)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
-    { name: "binding-sites-eh-07-glycans", desc: "Agentic reasoning on glycans (BGC, FUC) and sugar substrates (PDBs: 4WZZ, 5Z3F, 6KPM)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
-    { name: "binding-sites-eh-08-flavin-coa", desc: "Agentic reasoning on multi-flavin (FAD/FMN) + acetyl-CoA active sites (PDBs: 2CY2, 4BF9, 5I39)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
-    { name: "binding-sites-eh-09-multi-cofactor", desc: "Agentic reasoning on Mg/Mn-coord active sites with multiple cofactors (PDBs: 5A61, 5E4R, 4CVM)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
-    { name: "binding-sites-eh-10-heme-metal-filter", desc: "Agentic reasoning on heme + Mg-coord ATP with surface-Mg filtering (PDBs: 3DNT, 3R9C, 4L6G)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
-    { name: "binding-sites-eh-11-fe-2og", desc: "Agentic reasoning on Fe-coordinated α-KG dioxygenase active sites (PDBs: 2C78, 6K0F, 1R2Q)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
-    { name: "binding-sites-eh-12-heme-fe-s-artifact", desc: "Agentic reasoning on heme retention while dropping SF4 iron-sulfur as artifact (PDBs: 2DE3, 4Z5P, 3ZGN)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 0, f: 2, e: 0 } } },
-    { name: "binding-sites-eh-13-ap5-metal", desc: "Agentic reasoning on ADP/AP5 + Mg coordination with surface-Mg filtering (PDBs: 3BE4, 3NHA, 1G9X)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
-    { name: "binding-sites-eh-14-glycan-cofactor", desc: "Agentic reasoning on glycan (BGC) alongside ATP-analog + Trp scenes (PDBs: 7VT6, 6DA0, 2DEI)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
-    { name: "binding-sites-eh-15-di-nucleotides", desc: "Agentic reasoning on di-nucleotide (ADP/GDP) + vitamin substrate (PDBs: 5DMH, 5C1S, 4NMY)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
-    { name: "binding-sites-mh-01-substrates", desc: "Agentic reasoning on bare substrate ligands (no canonical cofactor)", models: { codex: { p: 2, f: 0, e: 0 }, claude: { p: 0, f: 2, e: 0 } } },
-    { name: "binding-sites-mh-02-heme-sam", desc: "Agentic reasoning on heme + SAM cofactor scenes", models: { codex: { p: 2, f: 0, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
-    { name: "binding-sites-mh-03-gdp-utp-arg", desc: "Agentic reasoning on GDP/UTP cofactors plus a free amino-acid ligand", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
-    { name: "binding-sites-mh-04-nucleosides", desc: "Agentic reasoning on nucleoside-class ligands (ADN/APR)", models: { codex: { p: 2, f: 0, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
-    { name: "binding-sites-mh-05-heme-artifacts", desc: "Agentic reasoning on heme cofactor under heavy buffer-additive load", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
-    { name: "binding-sites-mh-06-glycan-heme", desc: "Agentic reasoning on glycans + heme + ADP multi-facet scenes", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 0, f: 2, e: 0 } } },
-    { name: "binding-sites-mh-07-fad-sam", desc: "Agentic reasoning on FAD + SAM cofactor combinations", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
-    { name: "binding-sites-mh-08-udp-glycan", desc: "Agentic reasoning on UDP-sugar (NAG/BGC) glycan scenes", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
-    { name: "binding-sites-mh-09-fe-mg-nucleotide", desc: "Agentic reasoning on Fe- and Mg-coordinated nucleotides", models: { codex: { p: 2, f: 0, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
-    { name: "binding-sites-mh-10-gtp-metal-filter", desc: "Agentic reasoning on ADP/GTP + Mg coord with surface-ion filtering", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
-    { name: "binding-sites-mh-11-fad-adp", desc: "Agentic reasoning on FAD + ADP cofactor combinations", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 0, f: 2, e: 0 } } },
-    { name: "binding-sites-mh-12-anp-mg", desc: "Agentic reasoning on ATP-analog (ANP) + Mg coordination", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 0, f: 1, e: 1 } } },
-    { name: "binding-sites-mh-13-heme-flavin", desc: "Agentic reasoning on heme + FAD + complex substrate scenes", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
-    { name: "binding-sites-mh-14-nadp-metal", desc: "Agentic reasoning on NADP + Mg coordination under artifact load", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
-    { name: "binding-sites-mh-15-nad-sam", desc: "Agentic reasoning on NAD/NADP + SAM cofactor mixtures", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
+    { name: "binding-sites-eh-01-clean-cofactors", desc: "clean nucleotide cofactors (PDBs: 1JG1, 7D8F, 1A0I)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-eh-02-artifact-filter", desc: "cofactors under heavy buffer-additive artifact filtering (PDBs: 4FK7, 6X94, 5HGZ)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
+    { name: "binding-sites-eh-03-heme-flavin-nadp", desc: "heme + flavin + NADP multi-cofactor scenes (PDBs: 7SUX, 2HI4, 8H0M)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-eh-04-fad-substrate", desc: "FAD paired with a unique substrate (PDBs: 6R0P, 3BRN, 2YG7)", models: { codex: { p: 2, f: 0, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
+    { name: "binding-sites-eh-05-metal-nucleotide", desc: "Mg/Mn-coordinated nucleotide cofactors (PDBs: 5MF5, 2P73, 1YZQ)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-eh-06-atp-mg-surface", desc: "Mg-coordinated ATP analog with surface-ion filtering (PDBs: 6DYS, 4LRJ, 4UAU)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-eh-07-glycans", desc: "glycans (BGC, FUC) and sugar substrates (PDBs: 4WZZ, 5Z3F, 6KPM)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
+    { name: "binding-sites-eh-08-flavin-coa", desc: "multi-flavin (FAD/FMN) + acetyl-CoA active sites (PDBs: 2CY2, 4BF9, 5I39)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
+    { name: "binding-sites-eh-09-multi-cofactor", desc: "Mg/Mn-coord active sites with multiple cofactors (PDBs: 5A61, 5E4R, 4CVM)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-eh-10-heme-metal-filter", desc: "heme + Mg-coord ATP with surface-Mg filtering (PDBs: 3DNT, 3R9C, 4L6G)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
+    { name: "binding-sites-eh-11-fe-2og", desc: "Fe-coordinated α-KG dioxygenase active sites (PDBs: 2C78, 6K0F, 1R2Q)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-eh-12-heme-fe-s-artifact", desc: "heme retention while dropping SF4 iron-sulfur as artifact (PDBs: 2DE3, 4Z5P, 3ZGN)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 0, f: 2, e: 0 } } },
+    { name: "binding-sites-eh-13-ap5-metal", desc: "ADP/AP5 + Mg coordination with surface-Mg filtering (PDBs: 3BE4, 3NHA, 1G9X)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
+    { name: "binding-sites-eh-14-glycan-cofactor", desc: "glycan (BGC) alongside ATP-analog + Trp scenes (PDBs: 7VT6, 6DA0, 2DEI)", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-eh-15-di-nucleotides", desc: "di-nucleotide (ADP/GDP) + vitamin substrate (PDBs: 5DMH, 5C1S, 4NMY)", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
+    { name: "binding-sites-mh-01-substrates", desc: "bare substrate ligands (no canonical cofactor)", models: { codex: { p: 2, f: 0, e: 0 }, claude: { p: 0, f: 2, e: 0 } } },
+    { name: "binding-sites-mh-02-heme-sam", desc: "heme + SAM cofactor scenes", models: { codex: { p: 2, f: 0, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
+    { name: "binding-sites-mh-03-gdp-utp-arg", desc: "GDP/UTP cofactors plus a free amino-acid ligand", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
+    { name: "binding-sites-mh-04-nucleosides", desc: "nucleoside-class ligands (ADN/APR)", models: { codex: { p: 2, f: 0, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
+    { name: "binding-sites-mh-05-heme-artifacts", desc: "heme cofactor under heavy buffer-additive load", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
+    { name: "binding-sites-mh-06-glycan-heme", desc: "glycans + heme + ADP multi-facet scenes", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 0, f: 2, e: 0 } } },
+    { name: "binding-sites-mh-07-fad-sam", desc: "FAD + SAM cofactor combinations", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
+    { name: "binding-sites-mh-08-udp-glycan", desc: "UDP-sugar (NAG/BGC) glycan scenes", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-mh-09-fe-mg-nucleotide", desc: "Fe- and Mg-coordinated nucleotides", models: { codex: { p: 2, f: 0, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
+    { name: "binding-sites-mh-10-gtp-metal-filter", desc: "ADP/GTP + Mg coord with surface-ion filtering", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
+    { name: "binding-sites-mh-11-fad-adp", desc: "FAD + ADP cofactor combinations", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 0, f: 2, e: 0 } } },
+    { name: "binding-sites-mh-12-anp-mg", desc: "ATP-analog (ANP) + Mg coordination", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 0, f: 1, e: 1 } } },
+    { name: "binding-sites-mh-13-heme-flavin", desc: "heme + FAD + complex substrate scenes", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 2, f: 0, e: 0 } } },
+    { name: "binding-sites-mh-14-nadp-metal", desc: "NADP + Mg coordination under artifact load", models: { codex: { p: 0, f: 2, e: 0 }, claude: { p: 1, f: 1, e: 0 } } },
+    { name: "binding-sites-mh-15-nad-sam", desc: "NAD/NADP + SAM cofactor mixtures", models: { codex: { p: 1, f: 1, e: 0 }, claude: { p: 1, f: 0, e: 1 } } },
   ],
   proteins: [],
   peptides: [],
@@ -842,7 +956,7 @@ function renderTab(tabId) {
       <div class="ds-bar-wrap"><div class="ds-bar-fill ${scoreClass(pct)}" style="width:${pct}%"></div></div>
       <span class="ds-pct ${scoreClass(pct)}">${pct}%</span>
     </div>`
-  ).join("");
+  ).join("") + `<button class="run-agent-btn" type="button" id="runAgentBtn">Run your own agent <span class="arrow">&rarr;</span></button>`;
 
   taskList.innerHTML = tasks.map((t, i) => {
     const badges = Object.keys(MODEL_NAMES).map((m) => {
@@ -891,10 +1005,50 @@ if (_metricToggle) {
   });
 }
 
+const _benchCaption = document.getElementById("benchCaption");
+const _benchCaptionToggle = document.getElementById("benchCaptionToggle");
+if (_benchCaption && _benchCaptionToggle) {
+  _benchCaptionToggle.addEventListener("click", () => {
+    const expanded = _benchCaption.classList.toggle("expanded");
+    _benchCaptionToggle.textContent = expanded ? "Show less" : "Show more";
+    _benchCaptionToggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+  });
+}
+
 refreshAll();
+
+// ── Run-your-own-agent modal ──
+const _runModal = document.getElementById("runModal");
+const _runModalClose = document.getElementById("runModalClose");
+function openRunModal() {
+  if (!_runModal) return;
+  _runModal.classList.add("open");
+  _runModal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  const input = document.getElementById("runEmail");
+  if (input) setTimeout(() => input.focus(), 60);
+}
+function closeRunModal() {
+  if (!_runModal) return;
+  _runModal.classList.remove("open");
+  _runModal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+// Delegate click on the dynamically-rendered "Run your own agent" button.
+document.addEventListener("click", (e) => {
+  if (e.target.closest("#runAgentBtn")) openRunModal();
+});
+if (_runModalClose) _runModalClose.addEventListener("click", closeRunModal);
+if (_runModal) _runModal.addEventListener("click", (e) => {
+  if (e.target === _runModal) closeRunModal();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && _runModal && _runModal.classList.contains("open")) closeRunModal();
+});
 
 window.formspree = window.formspree || function () { (formspree.q = formspree.q || []).push(arguments); };
 formspree('initForm', { formElement: '#stay-form', formId: 'mojznqde' });
+formspree('initForm', { formElement: '#run-form', formId: 'mojznqde' });
 </script>
 <script src="https://unpkg.com/@formspree/ajax@1" defer></script>
 </body>
